@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="StacktraceSettings">
+    <option name="folders">
+      <set>
+        <option value="$PROJECT_DIR$/app/build/generated/ap_generated_sources/debug/out" />
+        <option value="$PROJECT_DIR$/app/build/generated/ap_generated_sources/debugAndroidTest/out" />
+        <option value="$PROJECT_DIR$/app/build/generated/res/resValues/androidTest/debug" />
+        <option value="$PROJECT_DIR$/app/build/generated/res/resValues/debug" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/buildConfig/androidTest/debug" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/buildConfig/debug" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/kapt/debug" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/kapt/debugAndroidTest" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/kapt/debugUnitTest" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/kaptKotlin/debug" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/kaptKotlin/debugAndroidTest" />
+        <option value="$PROJECT_DIR$/app/build/generated/source/kaptKotlin/debugUnitTest" />
+        <option value="$PROJECT_DIR$/app/build/generated/sqldelight/code/NoteDatabase/debug" />
+        <option value="$PROJECT_DIR$/app/src/androidTest/java" />
+        <option value="$PROJECT_DIR$/app/src/main/java" />
+        <option value="$PROJECT_DIR$/app/src/main/res" />
+        <option value="$PROJECT_DIR$/app/src/test/java" />
+        <option value="$PROJECT_DIR$/buildSrc/src/main/java" />
+      </set>
+    </option>
+    <option name="packages">
+      <set>
+        <option value="com.exzell.composenote" />
+        <option value="com.kashzoo.kashzoo" />
+        <option value="dagger.hilt.internal" />
+        <option value="twitter.screen" />
+        <option value="twitter.theme" />
+      </set>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,85 @@
+[versions]
+hilt = "2.45"
+navigation = "2.5.1"
+okhttp = "5.0.0-alpha.2"
+retrofit = "2.9.0"
+glide = "4.13.2"
+room = "2.4.3"
+sqldelight = "2.0.0-alpha05"
+
+[libraries]
+desugar = { module = 'com.android.tools:desugar_jdk_libs', version = "1.1.5" }
+
+core = { module = 'androidx.core:core-ktx', version = "1.8.0" }
+appcompat = { module = 'androidx.appcompat:appcompat', version = "1.5.0" }
+activity = { module = 'androidx.activity:activity-ktx', version = "1.4.0" }
+constraint_layout = { module = 'androidx.constraintlayout:constraintlayout', version = "2.1.4" }
+recyclerview = { module = 'androidx.recyclerview:recyclerview', version = "1.2.1" }
+
+lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version = "2.3.1" }
+
+swiperefresh = { module = 'androidx.swiperefreshlayout:swiperefreshlayout', version = "1.1.0" }
+
+navigation-fragment = { module = 'androidx.navigation:navigation-fragment-ktx', version.ref = "navigation" }
+navigation-ui = { module = 'androidx.navigation:navigation-ui-ktx', version.ref = "navigation" }
+
+preference = { module = 'androidx.preference:preference-ktx', version = "1.2.0" }
+
+room = { module = 'androidx.room:room-ktx', version.ref = "room" }
+room-runtime = { module = 'androidx.room:room-runtime', version.ref = "room" }
+room-compiler = { module = 'androidx.room:room-compiler', version.ref = "room" }
+
+hilt = { module = 'com.google.dagger:hilt-android', version.ref = "hilt" }
+hilt-compiler = { module = 'com.google.dagger:hilt-android-compiler', version.ref = "hilt" }
+
+timber = { module = 'com.jakewharton.timber:timber', version = "4.7.1" }
+
+glide = { module = 'com.github.bumptech.glide:glide', version.ref = "glide" }
+glide-compiler = { module = 'com.github.bumptech.glide:compiler', version.ref = "glide" }
+glide-okhttp = { module = 'com.github.bumptech.glide:okhttp3-integration', version.ref = "glide" }
+
+okhttp = { module = 'com.squareup.okhttp3:okhttp', version.ref = "okhttp" }
+okhttp-log = { module = 'com.squareup.okhttp3:logging-interceptor', version.ref = "okhttp" }
+
+retrofit = { module = 'com.squareup.retrofit2:retrofit', version.ref = "retrofit" }
+retrofit-gson = { module = 'com.squareup.retrofit2:converter-gson', version.ref = "retrofit" }
+
+gson = { module = 'com.google.code.gson:gson', version = "2.9.0" }
+
+materialdesign = { module = 'com.google.android.material:material', version = "1.6.1" }
+
+firebase-bom = { module = 'com.google.firebase:firebase-bom', version = "30.3.1" }
+firebase-messaging = { module = 'com.google.firebase:firebase-messaging' }
+firebase-analytics = { module = 'com.google.firebase:firebase-crashlytics-ktx' }
+firebase-crashlytics = { module = 'com.google.firebase:firebase-analytics-ktx' }
+
+sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight-jvm-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-adapter = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqldelight" }
+sqldelight-coroutine = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.strictly = "3.9.2"}
+
+[bundles]
+navigation = ["navigation-fragment", "navigation-ui"]
+room = ["room", "room-runtime"]
+network = ["okhttp", "okhttp-log", "retrofit", "retrofit-gson", "gson"]
+glide = ["glide", "glide-okhttp"]
+firebase = ["firebase-messaging", "firebase-analytics", "firebase-crashlytics"]
+compiler = ["room-compiler", "hilt-compiler", "glide-compiler"]
+sqldelight = ["sqldelight-android-driver", "sqldelight-adapter", "sqldelight-coroutine"]
+
+
+[plugins]
+gradle = { id = 'com.android.tools.build:gradle', version = "7.3.0" }
+gradle-kotlin = { id = 'org.jetbrains.kotlin:kotlin-gradle-plugin', version = "1.8.10" }
+
+google = { id = 'com.google.gms:google-services', version = "4.3.14" }
+firebase-crashlytics = { id = 'com.google.firebase:firebase-crashlytics-gradle', version = "2.9.2" }
+
+application = { id = 'com.android.application', version = '7.3.0' }
+library = { id = 'com.android.library', version = '7.3.0' }
+kotlin-android = { id = 'org.jetbrains.kotlin.android', version = '1.8.10' }
+hilt = { id = 'com.google.dagger.hilt.android', version.ref = "hilt" }
+navigation = { id = 'androidx.navigation:navigation-safe-args-gradle-plugin', version.ref = "navigation" }
+
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
