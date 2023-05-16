@@ -36,6 +36,8 @@ class HomeViewModel @Inject constructor(
 
     fun saveNote(note: Note) {
         viewModelScope.launch {
+            if(note.title.isEmpty() && note.body.isEmpty()) return@launch
+
             repo.saveNote(note)
         }
     }
