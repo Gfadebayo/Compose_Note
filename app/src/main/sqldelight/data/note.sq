@@ -17,14 +17,24 @@ selectAll:
 SELECT *
 FROM note_db;
 
-selectAllAvailable:
+selectByDeleteCategory:
 SELECT *
 FROM note_db
-WHERE is_deleted = 1;
+WHERE is_deleted = :is_deleted;
 
 updateNote:
 UPDATE note_db
 SET title = :title,
     body = :body
 WHERE id = :id;
+
+bulkDeleteNote:
+DELETE
+FROM note_db
+WHERE id IN :ids;
+
+bulkUpdateNoteToDelete:
+UPDATE note_db
+SET is_deleted = :isDeleted
+WHERE id IN :ids;
 

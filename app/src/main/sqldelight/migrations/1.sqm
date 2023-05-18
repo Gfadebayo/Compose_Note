@@ -1,0 +1,22 @@
+CREATE TABLE note_temp(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    color_first INTEGER NOT NULL,
+    color_second INTEGER NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_deleted INTEGER AS kotlin.Boolean NOT NULL DEFAULT 0
+);
+
+INSERT INTO note_temp SELECT * FROM note_db;
+
+DROP TABLE note_db;
+
+ALTER TABLE note_temp RENAME TO note_db;
+
+UPDATE note_db
+SET is_deleted = CASE
+WHEN is_deleted = 1 THEN 0
+WHEN is_deleted = 0 THEN 1
+END;
