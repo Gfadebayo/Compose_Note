@@ -8,7 +8,6 @@ import data.Note_db
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,9 +25,20 @@ class Repository @Inject constructor(
                 .map { it.toNotes() }
     }
 
+    fun getNotesByDeletion(isDeleted: Boolean): Flow<List<Note>> {
+        return database.noteQueries.selectByDeleteCategory(isDeleted)
+                .asFlow()
+                .mapToList(Dispatchers.IO)
+                .map { it.toNotes() }
+    }
+
     fun saveNote(note: Note) {
         if(note.id == -1L) queries.insertNote(note.title, note.body, note.colorFirst, note.colorSecond)
         else queries.updateNote(note.title, note.body, note.id)
+    }
+
+    fun setNoteDeleteStatus(isDeleted: Boolean, ids: List<Long>) {
+        queries.bulkUpdateNoteToDelete(isDeleted, ids)
     }
 
     private fun Note_db.toNote(): Note {

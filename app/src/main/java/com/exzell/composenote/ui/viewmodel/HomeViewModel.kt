@@ -8,8 +8,6 @@ import com.exzell.composenote.data.Repository
 import com.exzell.composenote.domain.Note
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,7 +18,7 @@ class HomeViewModel @Inject constructor(
 ): ViewModel() {
 
     fun getAllNotes(): Flow<List<Note>> {
-        return repo.getAllNotes()
+        return repo.getNotesByDeletion(false)
     }
 
     fun getDisplayMode(): Flow<Int> {
@@ -39,6 +37,12 @@ class HomeViewModel @Inject constructor(
             if(note.title.isEmpty() && note.body.isEmpty()) return@launch
 
             repo.saveNote(note)
+        }
+    }
+
+    fun deleteNotesWithIds(ids: List<Long>) {
+        viewModelScope.launch {
+            repo.setNoteDeleteStatus(true, ids)
         }
     }
 }
