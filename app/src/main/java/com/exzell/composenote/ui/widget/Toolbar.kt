@@ -5,18 +5,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MenuDefaults
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.exzell.composenote.R
+
+private val DEFAULT_SIZE = 56.dp
 
 @Composable
 fun Toolbar(
@@ -28,7 +30,7 @@ fun Toolbar(
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-    Row(modifier = modifier) {
+    Row(modifier = modifier.height(DEFAULT_SIZE)) {
         if (showUp) {
             IconButton(onClick = { onUpClicked?.invoke() ?: backDispatcher?.onBackPressed() }) {
                 Icon(painter = painterResource(id = R.drawable.ic_arrow_back), contentDescription = "Navigate up")
@@ -53,7 +55,8 @@ fun SearchToolbar(
         onMenuIconClicked: ((Int) -> Unit)? = null,
         onNavIconClicked: () -> Unit
 ) {
-    Row(modifier = Modifier.zIndex(200f), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier.height(DEFAULT_SIZE).zIndex(200f),
+            verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onNavIconClicked() }) {
             Icon(painter = painterResource(id = R.drawable.ic_nav_drawer), contentDescription = "Open navigation drawer")
         }
@@ -71,21 +74,25 @@ fun SearchToolbar(
 
 @Composable
 fun SelectionToolbar(
+        modifier: Modifier = Modifier,
         onCountChanged: String,
+        textStyle: TextStyle = LocalTextStyle.current,
         menuIcons: List<Int> = emptyList(),
         onMenuClick: ((Int) -> Unit)? = null,
         onCancelClick: () -> Unit,
 
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = modifier.height(DEFAULT_SIZE),
+            verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onCancelClick() }) {
-            Icon(painter = painterResource(id = R.drawable.ic_close), contentDescription = "Clear selection")
+            Icon(painter = painterResource(id = R.drawable.ic_close),
+                    contentDescription = "Clear selection")
         }
 
-        Text(text = onCountChanged)
+        Text(modifier = Modifier.weight(1f), text = onCountChanged, style = textStyle)
 
         menuIcons.forEachIndexed { index, iconRes ->
-            IconButton(onClick = { onMenuClick?.invoke(index) }) {
+            IconButton(onClick = { onMenuClick?.invoke(iconRes) }) {
                 Icon(painter = painterResource(id = iconRes), contentDescription = "Icon")
             }
         }
