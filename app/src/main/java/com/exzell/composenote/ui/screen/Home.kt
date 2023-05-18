@@ -1,5 +1,6 @@
 package com.exzell.composenote.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +18,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.exzell.composenote.R
@@ -28,7 +28,6 @@ import com.exzell.composenote.ui.viewmodel.HomeViewModel
 import com.exzell.composenote.ui.widget.SearchToolbar
 import com.exzell.composenote.ui.widget.SelectionToolbar
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 fun createDummyNotes(): List<Note> {
     return buildList {
@@ -45,26 +44,32 @@ fun Home(viewModel: HomeViewModel = hiltViewModel(),
          onCreateClick: () -> Unit,
          onNoteClick: (Note) -> Unit) {
 
-    val scope = rememberCoroutineScope()
-
-    val groupSelectionFlow = remember { MutableSharedFlow<Boolean?>(replay = 1) }
-
     val notes by viewModel.getAllNotes().collectAsState(initial = emptyList())
 
     val displayMode by viewModel.getDisplayMode().collectAsState(initial = -1)
 
-    var selectionCount by remember { mutableStateOf(0) }
+    //The currently selected items
+    val selectedItems = remember { mutableStateListOf<Long>() }
 
-    val onSelectionChanged: (Int) -> Unit = { selectionCount = it }
+    val onSelectionChanged: (Long) -> Unit = {
+        if (selectedItems.contains(it)) selectedItems.remove(it)
+        else selectedItems.add(it)
+    }
 
     val onMenuClick: (Int) -> Unit = { viewModel.switchDisplayMode(displayMode) }
 
-    val onCancelSelection: () -> Unit = { scope.launch { groupSelectionFlow.emit(false) } }
+    val onSelectionMenuClick: (Int) -> Unit = {
+        when (it) {
+            R.drawable.ic_delete -> viewModel.deleteNotesWithIds(selectedItems)
+        }
+    }
+
+    val onCancelSelection: () -> Unit = { selectedItems.clear() }
 
     Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                if (selectionCount == 0) {
+                if (selectedItems.size == 0) {
                     val menuIcon = if (displayMode == Constants.DISPLAY_MODE_GRID) R.drawable.ic_single_view
                     else R.drawable.ic_grid
 
@@ -76,9 +81,13 @@ fun Home(viewModel: HomeViewModel = hiltViewModel(),
                     }
                 }
                 else {
+                    val selectionMenu = listOf(R.drawable.ic_delete)
+
                     SelectionToolbar(
-                            onCountChanged = selectionCount.toString(),
+                            onCountChanged = selectedItems.size.toString(),
                             onCancelClick = onCancelSelection,
+                            menuIcons = selectionMenu,
+                            onMenuClick = onSelectionMenuClick
                     )
                 }
             },
@@ -104,19 +113,21 @@ fun Home(viewModel: HomeViewModel = hiltViewModel(),
 
         if (displayMode == Constants.DISPLAY_MODE_GRID) {
             HomeGridContent(notes = notes,
-                    selectionStateFlow = groupSelectionFlow,
                     paddingValues = realPadding,
                     onItemClick = onNoteClick,
-                    onSelectionChanged = onSelectionChanged)
+                    selectedItems = selectedItems,
+                    onSelectionChange = onSelectionChanged)
         }
         else if (displayMode == Constants.DISPLAY_MODE_LIST) {
             HomeListContent(notes = notes,
-                    selectionStateFlow = groupSelectionFlow,
                     paddingValues = realPadding,
                     onItemClick = onNoteClick,
-                    onSelectionChanged = onSelectionChanged)
+                    selectedItems = selectedItems,
+                    onSelectionChange = onSelectionChanged)
         }
     }
+
+    BackHandler(enabled = selectedItems.isNotEmpty(), onBack = onCancelSelection)
 }
 
 /**
@@ -125,33 +136,13 @@ fun Home(viewModel: HomeViewModel = hiltViewModel(),
 @Composable
 fun HomeListContent(
         modifier: Modifier = Modifier,
-        notes: List<Note>,
-        selectionStateFlow: Flow<Boolean?> = emptyFlow(),
         paddingValues: PaddingValues,
+        notes: List<Note>,
+        selectedItems: List<Long> = emptyList(),
         onLastItemAdded: (() -> Unit)? = null,
-        onSelectionChanged: ((Int) -> Unit)? = null,
+        onSelectionChange: ((Long) -> Unit)? = null,
         onItemClick: (Note) -> Unit
 ) {
-    val selectedItems = remember { mutableStateListOf<Long>() }
-
-    LaunchedEffect(Unit) {
-        selectionStateFlow.collect { isAllSelected ->
-            when (isAllSelected) {
-                true -> {
-                    selectedItems.addAll(notes.map { it.id }.filterNot { selectedItems.contains(it) })
-                    onSelectionChanged?.invoke(selectedItems.size)
-                }
-
-                false -> {
-                    selectedItems.clear()
-                    onSelectionChanged?.invoke(selectedItems.size)
-                }
-
-                else -> {}
-            }
-        }
-    }
-
     LazyColumn(modifier = modifier,
             contentPadding = paddingValues,
             verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -163,18 +154,17 @@ fun HomeListContent(
                 }
                 else if (it == CLICK_SINGLE && !selectedItems.contains(note.id)) {
                     //Add the item to the selected list
-                    selectedItems.add(note.id)
-                    onSelectionChanged?.invoke(selectedItems.size)
+                    onSelectionChange?.invoke(note.id)
                 }
                 else if (it == CLICK_SINGLE && selectedItems.contains(note.id)) {
                     //Remove the item from the selected list
-                    selectedItems.remove(note.id)
-                    onSelectionChanged?.invoke(selectedItems.size)
+                    onSelectionChange?.invoke(note.id)
                 }
                 else if (it == CLICK_LONG && !selectedItems.contains(note.id)) {
                     //Long click's only job is to add the item to the list
-                    selectedItems.add(note.id)
-                    onSelectionChanged?.invoke(selectedItems.size)
+                    onSelectionChange?.invoke(note.id)
+                }
+                else {
                 }
             }
 
@@ -202,59 +192,34 @@ private const val CLICK_LONG = 1
 @Composable
 fun HomeGridContent(
         modifier: Modifier = Modifier,
-        notes: List<Note>,
-        selectionStateFlow: Flow<Boolean?> = emptyFlow(),
         paddingValues: PaddingValues,
+        notes: List<Note>,
+        selectedItems: List<Long> = emptyList(),
         onLastItemAdded: (() -> Unit)? = null,
-        onSelectionChanged: ((Int) -> Unit)? = null,
+        onSelectionChange: ((Long) -> Unit)? = null,
         onItemClick: (Note) -> Unit) {
-
-    //The ids of the currently selected items
-    val selectedItems = remember { mutableStateListOf<Long>() }
-
-    LaunchedEffect(key1 = Unit) {
-        selectionStateFlow.collect { isAllSelected ->
-            when (isAllSelected) {
-                true -> {
-                    selectedItems.addAll(notes.map { it.id }.filterNot { selectedItems.contains(it) })
-                    onSelectionChanged?.invoke(selectedItems.size)
-                }
-
-                false -> {
-                    selectedItems.clear()
-                    onSelectionChanged?.invoke(selectedItems.size)
-                }
-
-                else -> {}
-            }
-        }
-    }
-
     LazyVerticalStaggeredGrid(modifier = modifier, columns = StaggeredGridCells.Fixed(2),
             contentPadding = paddingValues,
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         itemsIndexed(notes, key = { index, _ -> index }) { index, note ->
 
-            val onItemSelected: (Int) -> Unit = {
+            val itemSelected: (Int) -> Unit = {
                 if (it == CLICK_SINGLE && selectedItems.isEmpty()) {
                     //Go to the next screen
                     onItemClick(note)
                 }
                 else if (it == CLICK_SINGLE && !selectedItems.contains(note.id)) {
                     //Add the item to the selected list
-                    selectedItems.add(note.id)
-                    onSelectionChanged?.invoke(selectedItems.size)
+                    onSelectionChange?.invoke(note.id)
                 }
                 else if (it == CLICK_SINGLE && selectedItems.contains(note.id)) {
                     //Remove the item from the selected list
-                    selectedItems.remove(note.id)
-                    onSelectionChanged?.invoke(selectedItems.size)
+                    onSelectionChange?.invoke(note.id)
                 }
                 else if (it == CLICK_LONG && !selectedItems.contains(note.id)) {
                     //Long click's only job is to add the item to the list
-                    selectedItems.add(note.id)
-                    onSelectionChanged?.invoke(selectedItems.size)
+                    onSelectionChange?.invoke(note.id)
                 }
                 else {
                 }
@@ -264,7 +229,7 @@ fun HomeGridContent(
                     modifier = Modifier,
                     note = note,
                     isSelected = selectedItems.contains(note.id),
-                    onClicked = onItemSelected)
+                    onClicked = itemSelected)
 
             if (index == notes.size - 1 && onLastItemAdded != null) onLastItemAdded()
         }
@@ -286,11 +251,11 @@ fun HomeItem(
         isSelected: Boolean = false,
         onClicked: (Int) -> Unit
 ) {
-    val borderWidth = if(isSelected) 4.dp else 1.dp
-    val backgroundColor = if(!isSelected) Color(note.colorFirst).compositeOver(Color.White)
+    val borderWidth = if (isSelected) 4.dp else 1.dp
+    val backgroundColor = if (!isSelected) Color(note.colorFirst).compositeOver(Color.White)
     else Color(note.colorFirst)
 
-    val borderColor = if(!isSelected) Color(note.colorSecond) else Color.Blue
+    val borderColor = if (!isSelected) Color(note.colorSecond) else Color.Blue
 
     val newModifier = modifier
             .border(borderWidth, borderColor, RoundedCornerShape(8.dp))
@@ -347,7 +312,6 @@ fun HomeListPreview() {
                     notes = createDummyNotes(),
                     paddingValues = PaddingValues(horizontal = 6.dp, vertical = 36.dp),
                     onLastItemAdded = onLastItemAdded,
-                    onSelectionChanged = onSelectionChanged,
                     onItemClick = {})
         }
         else {
@@ -356,7 +320,6 @@ fun HomeListPreview() {
                     notes = createDummyNotes(),
                     paddingValues = PaddingValues(horizontal = 6.dp, vertical = 36.dp),
                     onLastItemAdded = onLastItemAdded,
-                    onSelectionChanged = onSelectionChanged,
                     onItemClick = {})
         }
     }
