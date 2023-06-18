@@ -1,0 +1,20 @@
+CREATE VIRTUAL TABLE IF NOT EXISTS note_fts USING fts4(id INTEGER, title TEXT, body TEXT);
+
+CREATE TRIGGER IF NOT EXISTS notes_fts_before_delete AFTER DELETE ON note_db
+ BEGIN
+    DELETE FROM note_fts WHERE id=old.id;
+ END;
+
+CREATE TRIGGER notes_after_update AFTER UPDATE ON note_db
+ BEGIN
+    UPDATE note_fts
+    SET title = new.title, body = new.body
+    WHERE id = old.id;
+ END;
+
+CREATE TRIGGER notes_after_insert AFTER INSERT ON note_db
+ BEGIN
+    INSERT INTO note_fts(id, title, body)
+    SELECT id, title, body FROM note_db
+    WHERE new.rowid = note_fts.rowid;
+ END;

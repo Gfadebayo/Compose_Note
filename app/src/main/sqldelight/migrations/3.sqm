@@ -1,0 +1,8 @@
+DROP TRIGGER notes_after_insert;
+
+CREATE TRIGGER notes_after_insert AFTER INSERT ON note_db
+ BEGIN
+    INSERT INTO note_fts(id, title, body)
+    SELECT id, title, body FROM note_db
+    WHERE id = new.id;
+ END;

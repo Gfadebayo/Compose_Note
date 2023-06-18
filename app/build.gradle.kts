@@ -54,6 +54,7 @@ android {
             create("NoteDatabase") {
                 packageName.set("com.exzell.composenote.data.database")
                 schemaOutputDirectory.set(file("build/outputs/database"))
+                deriveSchemaFromMigrations.set(true)
             }
         }
     }
@@ -63,6 +64,11 @@ dependencies {
     implementation(libs.bundles.sqldelight)
 //    testImplementation(libs.sqlite.jdbc)
     testImplementation(libs.sqldelight.jvm.driver)
+
+    testImplementation("org.xerial:sqlite-jdbc:3.9.2") {
+        this.endorseStrictVersions()
+        // Override the version of sqlite used by sqlite-driver to match Android API 23
+    }
 
     implementation(libs.core)
 

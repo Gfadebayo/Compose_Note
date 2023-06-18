@@ -1,17 +1,10 @@
-CREATE TABLE IF NOT EXISTS note_db(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    body TEXT NOT NULL,
-    color_first INTEGER NOT NULL,
-    color_second INTEGER NOT NULL,
-    created_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_deleted INTEGER AS kotlin.Boolean NOT NULL DEFAULT 1
-);
-
 insertNote:
 INSERT INTO note_db(title, body, color_first, color_second)
 VALUES (:title, :body, :colorFirst, :colorSecond);
+
+getNote:
+SELECT * FROM note_db
+ WHERE id = :id;
 
 selectAll:
 SELECT *
@@ -38,3 +31,6 @@ UPDATE note_db
 SET is_deleted = :isDeleted
 WHERE id IN :ids;
 
+searchNote:
+SELECT * FROM
+note_db WHERE id IN (SELECT id FROM note_fts WHERE title MATCH :text OR body MATCH :text);

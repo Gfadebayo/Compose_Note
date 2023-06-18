@@ -4,7 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.exzell.composenote.data.database.NoteDatabase
 import com.exzell.composenote.domain.Note
-import data.Note_db
+import migrations.Note_db
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,9 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class Repository @Inject constructor(
-        private val database: NoteDatabase
-) {
+class Repository @Inject constructor(private val database: NoteDatabase) {
 
     private val queries = database.noteQueries
 
