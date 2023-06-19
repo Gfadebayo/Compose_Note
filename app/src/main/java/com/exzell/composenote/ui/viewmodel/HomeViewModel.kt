@@ -8,6 +8,8 @@ import com.exzell.composenote.data.Repository
 import com.exzell.composenote.domain.Note
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,10 +17,21 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
         private val repo: Repository,
         private val prefManager: PreferenceManager
-): ViewModel() {
+) : ViewModel() {
 
-    fun getAllNotes(): Flow<List<Note>> {
-        return repo.getNotesByDeletion(false)
+    private val _notesFlow = MutableStateFlow<List<Note>>(emptyList())
+
+    val notesFlow = _notesFlow.asStateFlow()
+
+    init {
+        getNotes()
+    }
+
+    fun getNotes(isDeleted: Boolean = false, search: String = "") {
+        viewModelScope.launch {
+            _notesFlow.value = if (search.isBlank()) repo.getNotesByDeletion(isDeleted)
+            else repo.searchNoteWithDeleteStatus(search, isDeleted)
+        }
     }
 
     fun getDisplayMode(): Flow<Int> {
@@ -26,7 +39,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun switchDisplayMode(mode: Int) {
-        val newMode = if(mode == Constants.DISPLAY_MODE_GRID) Constants.DISPLAY_MODE_LIST
+        val newMode = if (mode == Constants.DISPLAY_MODE_GRID) Constants.DISPLAY_MODE_LIST
         else Constants.DISPLAY_MODE_GRID
 
         prefManager.setDisplayMode(newMode)
@@ -34,7 +47,7 @@ class HomeViewModel @Inject constructor(
 
     fun saveNote(note: Note) {
         viewModelScope.launch {
-            if(note.title.isEmpty() && note.body.isEmpty()) return@launch
+            if (note.title.isEmpty() && note.body.isEmpty()) return@launch
 
             repo.saveNote(note)
         }

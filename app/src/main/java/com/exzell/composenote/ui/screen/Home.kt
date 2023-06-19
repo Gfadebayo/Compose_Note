@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +45,7 @@ fun Home(viewModel: HomeViewModel = hiltViewModel(),
          onCreateClick: () -> Unit,
          onNoteClick: (Note) -> Unit) {
 
-    val notes by viewModel.getAllNotes().collectAsState(initial = emptyList())
+    val notes by viewModel.notesFlow.collectAsState(initial = emptyList())
 
     val displayMode by viewModel.getDisplayMode().collectAsState(initial = -1)
 
@@ -74,8 +75,11 @@ fun Home(viewModel: HomeViewModel = hiltViewModel(),
                     else R.drawable.ic_grid
 
                     SearchToolbar(
+                            text = "",
+                            placeholder = stringResource(id = R.string.search_your_notes),
                             menuIcons = listOf(menuIcon),
-                            onMenuIconClicked = onMenuClick
+                            onMenuIconClicked = onMenuClick,
+                            onSearchTextChange = { viewModel.getNotes(search = it) }
                     ) {
 
                     }

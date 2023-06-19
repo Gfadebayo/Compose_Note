@@ -7,18 +7,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.exzell.composenote.R
 
 private val DEFAULT_SIZE = 56.dp
+
+@Preview(showBackground = true, backgroundColor = android.graphics.Color.WHITE.toLong())
+@Composable
+fun SearchToolbarPreview() {
+    SearchToolbar(text = "Previewing") {
+
+    }
+}
 
 @Composable
 fun Toolbar(
@@ -49,26 +57,52 @@ fun Toolbar(
     }
 }
 
+
+private val searchTextFieldColors: TextFieldColors
+    @Composable get() = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent,
+            disabledBorderColor = Color.Transparent
+    )
+
 @Composable
 fun SearchToolbar(
+        text: String = "",
+        placeholder: String = "",
         menuIcons: List<Int> = emptyList(),
         onMenuIconClicked: ((Int) -> Unit)? = null,
+        onSearchTextChange: ((String) -> Unit)? = null,
         onNavIconClicked: () -> Unit
 ) {
-    Row(modifier = Modifier.height(DEFAULT_SIZE).zIndex(200f),
+    var searchText by remember { mutableStateOf(text) }
+
+    Row(modifier = Modifier
+            .height(DEFAULT_SIZE)
+            .zIndex(200f),
             verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { onNavIconClicked() }) {
-            Icon(painter = painterResource(id = R.drawable.ic_nav_drawer), contentDescription = "Open navigation drawer")
+        IconButton(onClick = onNavIconClicked) {
+            Icon(painter = painterResource(R.drawable.ic_nav_drawer),
+                    contentDescription = "Open navigation drawer")
         }
 
-        Text(text = stringResource(id = R.string.search_your_notes),
-            modifier = Modifier.weight(1f))
+        OutlinedTextField(value = searchText,
+                onValueChange = {
+                    onSearchTextChange?.invoke(it)
+                    searchText = it
+                },
+                singleLine = true,
+                placeholder = { Text(text = placeholder) },
+                colors = searchTextFieldColors)
 
         menuIcons.forEachIndexed { index, iconRes ->
             IconButton(onClick = { onMenuIconClicked?.invoke(index) }) {
-                Icon(painter = painterResource(id = iconRes), contentDescription = "Icon")
+                Icon(painter = painterResource(iconRes), contentDescription = "Icon")
             }
         }
+
+//        DisposableEffect(key1 = Unit) {
+//
+//        }
     }
 }
 
@@ -79,8 +113,7 @@ fun SelectionToolbar(
         textStyle: TextStyle = LocalTextStyle.current,
         menuIcons: List<Int> = emptyList(),
         onMenuClick: ((Int) -> Unit)? = null,
-        onCancelClick: () -> Unit,
-
+        onCancelClick: () -> Unit
 ) {
     Row(modifier = modifier.height(DEFAULT_SIZE),
             verticalAlignment = Alignment.CenterVertically) {

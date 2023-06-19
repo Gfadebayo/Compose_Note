@@ -35,9 +35,11 @@ fun CreateNote(
 ) {
     var newNote by remember { mutableStateOf(note ?: Note()) }
 
-    val menuIcons = listOf(R.drawable.ic_push_pin, R.drawable.ic_alarm_add, R.drawable.ic_move_to_inbox)
-    fun onMenuClicked(index: Int) {
-
+    val menuIcons = listOf(R.drawable.ic_push_pin, R.drawable.ic_alarm_add, R.drawable.ic_move_to_inbox, R.drawable.ic_delete)
+    fun onMenuClicked(id: Int) {
+        when(id) {
+            R.drawable.ic_delete -> viewModel.deleteNotesWithIds(listOf(newNote.id))
+        }
     }
 
     Column(modifier = parentModifier) {
