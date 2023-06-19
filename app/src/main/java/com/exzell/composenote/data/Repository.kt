@@ -1,13 +1,8 @@
 package com.exzell.composenote.data
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import com.exzell.composenote.data.database.NoteDatabase
 import com.exzell.composenote.domain.Note
 import migrations.Note_db
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,27 +11,27 @@ class Repository @Inject constructor(private val database: NoteDatabase) {
 
     private val queries = database.noteQueries
 
-    fun getAllNotes(): Flow<List<Note>> {
-        return database.noteQueries.selectAll()
-                .asFlow()
-                .mapToList(Dispatchers.IO)
-                .map { it.toNotes() }
-    }
-
-    fun getNotesByDeletion(isDeleted: Boolean): Flow<List<Note>> {
+    fun getNotesByDeletion(isDeleted: Boolean): List<Note> {
         return database.noteQueries.selectByDeleteCategory(isDeleted)
-                .asFlow()
-                .mapToList(Dispatchers.IO)
-                .map { it.toNotes() }
+                .executeAsList()
+                .map { it.toNote() }
     }
 
     fun saveNote(note: Note) {
-        if(note.id == -1L) queries.insertNote(note.title, note.body, note.colorFirst, note.colorSecond)
+        if (note.id == -1L) queries.insertNote(note.title, note.body, note.colorFirst, note.colorSecond)
         else queries.updateNote(note.title, note.body, note.id)
     }
 
     fun setNoteDeleteStatus(isDeleted: Boolean, ids: List<Long>) {
         queries.bulkUpdateNoteToDelete(isDeleted, ids)
+    }
+
+    fun searchNoteWithDeleteStatus(text: String, isDeleted: Boolean): List<Note> {
+        //the * after text is the wildcard. If it is not present then the query matches only the entire word
+        //would have preferred if this could just be in the sql statement but unfortunately
+        return queries.searchNoteWithDeleteStatus("$text*", isDeleted)
+                .executeAsList()
+                .map { it.toNote() }
     }
 
     private fun Note_db.toNote(): Note {
