@@ -21,16 +21,12 @@ SET title = :title,
     body = :body
 WHERE id = :id;
 
-bulkDeleteNote:
-DELETE
-FROM note_db
-WHERE id IN :ids;
-
 bulkUpdateNoteToDelete:
 UPDATE note_db
 SET is_deleted = :isDeleted
 WHERE id IN :ids;
 
-searchNote:
-SELECT * FROM
-note_db WHERE id IN (SELECT id FROM note_fts WHERE title MATCH :text OR body MATCH :text);
+searchNoteWithDeleteStatus:
+SELECT * FROM note_db
+WHERE id IN (SELECT id FROM note_fts WHERE note_fts MATCH :text || '*')
+AND is_deleted = :isDeleted;
