@@ -25,6 +25,8 @@ class ComposePlugin: Plugin<Project> {
             dependencies {
                 implementation(platform(composeCatalog.findLibrary("bom").get()))
 
+                implementation(composeCatalog.findBundle("accompanist").get())
+
                 implementation(composeCatalog.findBundle("core").get())
 
                 implementation(composeCatalog.findLibrary("ui-preview").get())
